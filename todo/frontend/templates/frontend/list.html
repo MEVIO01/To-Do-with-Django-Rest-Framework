@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>To Do</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    </head>
+    <body>
+        <div class="container">
+            <div id="task-container">
+                <div id="form-wrapper">
+                    <form id="form">
+                        <div class="flex-wrapper">
+                            <div>
+                                <input id="title" type="text" class="form-control" name="title" placeholder="Add a new task">
+                            </div>
+                            <div>
+                                <input id="submit" type="submit" class="btn">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div id="list-wrapper">
+                    
+                </div>
+            </div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+        <script type="text/javascript">
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            const csrftoken = getCookie('csrftoken');
+
+
+            buildList()
+            function buildList(){
+
+                var wrapper = document.getElementById('list-wrapper') 
+                wrapper.innerHTML = ''
+                var url = 'http://127.0.0.1:8000/tasks/task-list/'
+                fetch(url)
+                .then((resp) => resp.json())
+                .then(function(data){
+                    console.log('Data:', data)
+
+                    var list = data
+                    for(i in list){
+                        var item = `
+                            <div id="data-row-${i}" class="task-wrapper flex-wrapper">
+                                <div style="flex:7">
+                                    <span class="title">${list[i].title}</span>
+                                </div>
+                                <div style="flex:7">
+                                    <span class="btn btn-sm btn-outline-info edit">Edit</span>
+                                </div>
+                                <div style="flex:7">
+                                    <span class="btn btn-sm btn-outline-dark delete">-</span>
+                                </div>
+                            </div>
+                        `
+                        wrapper.innerHTML += item
+                    }
+                })
+            }
+            var form = document.getElementById('form-wrapper')
+            form.addEventListener('submit', function(e){
+                e.preventDefault()
+                console.log('Form submitted')
+                var url = 'http://127.0.0.1:8000/tasks/task-create/'
+                var title = document.getElementById('title').value
+                fetch(url, {
+                    method:'POST',
+                    headers: {
+                        'Content-type':'application/json',
+                        'X-CSRFToken':csrftoken,
+                    },
+                    body:JSON.stringify({'title': title})
+                }).then(function(response){
+                    buildList()
+                    document.getElementById('form').reset()
+                })
+            })
+        </script>
+    </body>
+</html>
