@@ -46,6 +46,7 @@
             }
             const csrftoken = getCookie('csrftoken');
 
+            var activeItem = null
 
             buildList()
             function buildList(){
@@ -60,10 +61,14 @@
 
                     var list = data
                     for(i in list){
+                        var title = `<span class="title">${list[i].title}</span>`
+                        if(list[i].completed == true){
+                            title = `<strike class="title">${list[i].title}</strike>`
+                        }
                         var item = `
                             <div id="data-row-${i}" class="task-wrapper flex-wrapper">
                                 <div style="flex:7">
-                                    <span class="title">${list[i].title}</span>
+                                    ${title}
                                 </div>
                                 <div style="flex:7">
                                     <span class="btn btn-sm btn-outline-info edit">Edit</span>
@@ -74,6 +79,31 @@
                             </div>
                         `
                         wrapper.innerHTML += item
+
+                        
+                    }
+                    for(i in list){
+                        var editBtn = document.getElementsByClassName('edit')[i]
+                        var deleteBtn = document.getElementsByClassName('delete')[i]
+                        var title = document.getElementsByClassName('title')[i]
+
+                        editBtn.addEventListener('click', (function(item){
+                            return function(){
+                                editItem(item)
+                            }
+                        })(list[i]))
+
+                        deleteBtn.addEventListener('click', (function(item){
+                            return function(){
+                                deleteItem(item)
+                            }
+                        })(list[i]))
+
+                        title.addEventListener('click', (function(item){
+                            return function(){
+                                markComplete(item)
+                            }
+                        })(list[i]))
                     }
                 })
             }
@@ -82,6 +112,10 @@
                 e.preventDefault()
                 console.log('Form submitted')
                 var url = 'http://127.0.0.1:8000/tasks/task-create/'
+                if (activeItem != null){
+                    var url = `http://127.0.0.1:8000/tasks/task-update/${activeItem.id}/`
+                    activeItem = null
+                }
                 var title = document.getElementById('title').value
                 fetch(url, {
                     method:'POST',
@@ -95,6 +129,40 @@
                     document.getElementById('form').reset()
                 })
             })
+
+            function editItem(item){
+                console.log('Item clicked: ', item)
+                activeItem = item
+                document.getElementById('title').value = activeItem.title
+            }
+
+            function deleteItem(item){
+                console.log('Delete clicked')
+                fetch(`http://127.0.0.1:8000/tasks/task-delete/${item.id}/`, {
+                    method: 'DELETE',
+                    headers:{
+                        'Content-type':'application/json',
+                        'X-CSRFToken':csrftoken,
+                    }
+                }).then((response) => {
+                    buildList()
+                })
+            }
+            function markComplete(item){
+                console.log('Clicked')
+
+                item.completed = !item.completed
+                fetch(`http://127.0.0.1:8000/tasks/task-update/${item.id}/`, {
+                    method: 'POST',
+                    headers:{
+                        'Content-type':'application/json',
+                        'X-CSRFToken':csrftoken,
+                    },
+                    body:JSON.stringify({'title': item.title, 'completed': item.completed})
+                }).then((response) => {
+                    buildList()
+                })
+            }
         </script>
     </body>
 </html>
