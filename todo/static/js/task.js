@@ -46,15 +46,15 @@ function buildList(){
                 title = `<strike class="title">${list[i].title}</strike>`
             }
             var item = `
-                <div id="data-row-${i}" class="task-wrapper flex-wrapper">
-                    <div style="flex:7">
-                        ${title}
+                <div id="data-row-${i}" class="task-wrapper flex-wrapper row mt-3">
+                    <div style="flex:7" class="col-10">
+                        <h3 role="button">${title}</h3>
                     </div>
-                    <div style="flex:7">
+                    <div style="flex:7" class="col-1">
                         <span class="btn btn-sm btn-outline-info edit">Edit</span>
                     </div>
-                    <div style="flex:7">
-                        <span class="btn btn-sm btn-outline-dark delete">-</span>
+                    <div style="flex:7" class="col-1">
+                        <span class="btn btn-sm btn-outline-danger delete">Remove</span>
                     </div>
                 </div>
             `
